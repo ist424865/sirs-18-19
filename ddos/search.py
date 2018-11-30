@@ -5,6 +5,7 @@ Host search inside a network
 import socket
 import nmap
 import ifaddr
+import re
 
 
 # Returns the ip of the current machine
@@ -24,9 +25,14 @@ def get_ip_addresses():
     networks = list()
     adapters = ifaddr.get_adapters()
 
+    # Match only valid IPs (xxx.xxx.xxx.xxx)
+    rp = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+
     for adapter in adapters:
         for ip in adapter.ips:
-            networks.append("%s/%s" % (ip.ip, ip.network_prefix))
+            is_valid = rp.match(str(ip.ip))
+            if is_valid:
+                networks.append("%s/%s" % (ip.ip, ip.network_prefix))
 
     return networks
 
