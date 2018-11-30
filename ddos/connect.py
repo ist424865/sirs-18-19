@@ -23,7 +23,7 @@ def is_open(host, port):
 def login(host, username, password):
     try:
         # Start connection
-        tn = telnetlib.Telnet(host, timeout=3)
+        tn = telnetlib.Telnet(host, timeout=1)
         # 'b' before converts to binary
         tn.read_until(b"login: ", 10)
         tn.write(username.encode('ascii') + b"\n")
