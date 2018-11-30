@@ -31,7 +31,7 @@ def get_ip_addresses():
     for adapter in adapters:
         for ip in adapter.ips:
             is_valid = rp.match(str(ip.ip))
-            if is_valid:
+            if is_valid and ip.ip != '127.0.0.1':
                 networks.append("%s/%s" % (ip.ip, ip.network_prefix))
 
     return networks
