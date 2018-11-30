@@ -52,7 +52,7 @@ def scan_udp_ports(host):
         # Only add open ports
         for port in udp_ports:
             state = nm[host]['udp'][port]['state']
-            if state == 'open':
+            if state == 'open' or state == 'open|filtered':
                 ports.append(port)
     except KeyError:
         # No UDP ports found
