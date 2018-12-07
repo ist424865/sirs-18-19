@@ -1,0 +1,10 @@
+---
+
+- name: Add the user 'admin' in group of 'sudoers' and with password 'admin'
+  user:
+    name: admin
+    comment: Admin
+    groups: sudo
+    password: $6$bF54bwAcp6co1$Nq9F0k8CRHOsMi6mfoFOcRcMoQF8gFBdqGVyc6OtUyEs1JIhHyP.N/s33a47/6IB6Sn5pzwV1debdLDxlm7B4/ # admin (using 'mkpasswd')
+    state: present
+  become: yes

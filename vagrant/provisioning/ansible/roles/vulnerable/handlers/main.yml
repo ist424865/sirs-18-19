@@ -1,0 +1,13 @@
+---
+
+- name: Start Telnet
+  service: 
+    name: telnetd 
+    state: started
+  become: yes
+
+- name: Reload Telnet
+  service: 
+    name: telnetd 
+    state: reloaded
+  become: yes

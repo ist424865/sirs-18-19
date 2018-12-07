@@ -1,5 +1,6 @@
 ---
 # This playbook contains plays that will be run on client (vulnerable) nodes.
+- include: users.yml
 
 - name: Ensure python 3 is present
   apt: 
@@ -17,6 +18,9 @@
     - python3-dev
     - build-essential
     - nmap
+    - telnet
+    - telnetd
+  #notify: Reload Telnet
   become: yes
 
 # Ensure that pip is installed
