@@ -18,6 +18,7 @@
     - build-essential
     - nmap
   become: yes
+
 # Ensure that pip is installed
 
 - name: Check to see if pip is already installed
@@ -28,17 +29,17 @@
 
 - name: Download get-pip.py
   get_url: 
-    url: https://bootstrap.pypa.io/get-pip.py  
+    url: https://bootstrap.pypa.io/get-pip.py
     dest: /tmp
     validate_certs: no
   register: pipdownloaded
   when: pipisinstalled is failed
-  become: yes
 
 - name: Install pip3
   command: "python3 /tmp/get-pip.py"
   when: pipisinstalled is failed and pipdownloaded is succeeded
   register: pipinstalled
+  become: yes
 
 - name: Delete get-pip.py
   file: 
@@ -47,11 +48,12 @@
   when: pipisinstalled is failed and pipinstalled is succeeded
 
 # Install Python3 packages
+
 - name: Install a list of python packages, force upgrade
   pip:
     name: "{{ packages }}"
     state: latest
-  when: pipisinstalled is succeeded or pipinstalled is succeded
+  when: pipisinstalled is succeeded or pipinstalled is succeeded
   vars:
     packages:
     - virtualenv
