@@ -1,0 +1,19 @@
+---
+# This playbook contains common plays that will be run on all nodes.
+
+- name: Ensure vim is present
+  apt: 
+    name: vim 
+    state: present 
+    update_cache: true
+  become: yes
+
+- name: Remove useless packages from the cache
+  apt:
+    autoclean: yes
+  become: yes
+
+- name: Remove dependencies that are no longer required
+  apt:
+    autoremove: yes
+  become: yes

@@ -1,0 +1,60 @@
+---
+# This playbook contains plays that will be run on client (vulnerable) nodes.
+
+- name: Ensure python 3 is present
+  apt: 
+    name: python
+    state: present 
+    update_cache: true
+  become: yes
+- name: Install a list of packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - python3-setuptools
+    - python3-dev
+    - build-essential
+    - nmap
+  become: yes
+# Ensure that pip is installed
+
+- name: Check to see if pip is already installed
+  command: "pip3 --version"
+  ignore_errors: true
+  register: pipisinstalled
+  changed_when: false
+
+- name: Download get-pip.py
+  get_url: 
+    url: https://bootstrap.pypa.io/get-pip.py  
+    dest: /tmp
+    validate_certs: no
+  register: pipdownloaded
+  when: pipisinstalled is failed
+  become: yes
+
+- name: Install pip3
+  command: "python3 /tmp/get-pip.py"
+  when: pipisinstalled is failed and pipdownloaded is succeeded
+  register: pipinstalled
+
+- name: Delete get-pip.py
+  file: 
+    state: absent 
+    path: /tmp/get-pip.py
+  when: pipisinstalled is failed and pipinstalled is succeeded
+
+# Install Python3 packages
+- name: Install a list of python packages, force upgrade
+  pip:
+    name: "{{ packages }}"
+    state: latest
+  when: pipisinstalled is succeeded or pipinstalled is succeded
+  vars:
+    packages:
+    - virtualenv
+    - python-nmap
+    - ifaddr
+  become: yes

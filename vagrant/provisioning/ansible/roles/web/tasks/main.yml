@@ -1,0 +1,29 @@
+---
+# This playbook contains plays that will be run on web server.
+
+- name: Ensure nginx repository is present
+  apt_repository: 
+    repo: 'ppa:nginx/stable' 
+    state: present
+  register: nginxrepo
+  become: yes
+
+- name: ensure ngingx is present
+  apt: 
+    name: nginx
+    state: present 
+    update_cache: true
+  when: nginxrepo is succeeded
+  register: nginx
+  notify:
+    - Start Nginx
+  become: yes
+
+- name: change presentation page
+  when: nginx is succeeded
+  template:
+    src: index.html
+    dest: /usr/share/nginx/www/index.html
+  notify:
+    - Reload Nginx
+  become: yes
