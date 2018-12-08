@@ -1,11 +1,14 @@
 ---
 # This playbook contains common plays that will be run on all nodes.
 
-- name: Ensure vim is present
-  apt: 
-    name: vim 
-    state: present 
-    update_cache: true
+- name: Ensure a list of common packages is present
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - vim
+    - unzip
   become: yes
 
 - name: Remove useless packages from the cache
