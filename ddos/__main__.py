@@ -1,3 +1,5 @@
+# file ddos/__main__.py
+
 """
 Performs the attack on the network and replicates itself
 """
