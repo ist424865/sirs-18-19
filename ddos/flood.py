@@ -36,4 +36,7 @@ def flood_host(host, amount):
         print("Flooding port:", open_ports[index])
 
         # If amount is 0, floods the first random port only
-        udp_flood(host, open_ports[index], amount)
+        try:
+            udp_flood(host, open_ports[index], amount)
+        except:
+            print("Cannot flood port", open_ports[index])

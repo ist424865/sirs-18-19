@@ -23,6 +23,7 @@ def get_ip_address():
 # Find all IP addresses of the computer
 def get_ip_addresses():
     networks = list()
+    ips = list()
     adapters = ifaddr.get_adapters()
 
     # Match only valid IPs (xxx.xxx.xxx.xxx)
@@ -32,9 +33,10 @@ def get_ip_addresses():
         for ip in adapter.ips:
             is_valid = rp.match(str(ip.ip))
             if is_valid and ip.ip != '127.0.0.1':
+                ips.append(ip.ip)
                 networks.append("%s/%s" % (ip.ip, ip.network_prefix))
 
-    return networks
+    return networks, ips
 
 
 # Get open UDP ports of given host
