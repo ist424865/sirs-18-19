@@ -4,3 +4,5 @@ venv/
 env/
 .vagrant/
 playbook.retry
+ddos.zip
+*.swp
