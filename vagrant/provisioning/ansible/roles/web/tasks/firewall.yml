@@ -1,0 +1,33 @@
+---
+# Firewall rules for webserver (not actually implemented)
+
+- name: Ensure ufw is present
+  apt: 
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  vars:
+    packages:
+      - ufw
+
+- name: Open UDP ports for flood attack
+  ufw:
+    rule: allow
+    port: 1000:1010
+    proto: udp
+  become: yes
+  
+- name: Allow HTTP connection
+  ufw:
+    rule: allow
+    port: 80
+    proto: tcp
+
+- name: Allow SSH connection
+  ufw:
+    rule: allow
+    port: ssh
+    proto: tcp
+
+  notify:
+    - Reload ufw

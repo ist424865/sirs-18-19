@@ -20,36 +20,7 @@
     - nmap
     - telnet
     - telnetd
-  #notify: Reload Telnet
   become: yes
-
-# Ensure that pip is installed
-
-- name: Check to see if pip is already installed
-  command: "pip3 --version"
-  ignore_errors: true
-  register: pipisinstalled
-  changed_when: false
-
-- name: Download get-pip.py
-  get_url: 
-    url: https://bootstrap.pypa.io/get-pip.py
-    dest: /tmp
-    validate_certs: no
-  register: pipdownloaded
-  when: pipisinstalled is failed
-
-- name: Install pip3
-  command: "python3 /tmp/get-pip.py"
-  when: pipisinstalled is failed and pipdownloaded is succeeded
-  register: pipinstalled
-  become: yes
-
-- name: Delete get-pip.py
-  file: 
-    state: absent 
-    path: /tmp/get-pip.py
-  when: pipisinstalled is failed and pipinstalled is succeeded
 
 # Install Python3 packages
 
@@ -57,7 +28,7 @@
   pip:
     name: "{{ packages }}"
     state: latest
-  when: pipisinstalled is succeeded or pipinstalled is succeeded
+  #when: pipisinstalled is succeeded or pipinstalled is succeeded
   vars:
     packages:
     - virtualenv
