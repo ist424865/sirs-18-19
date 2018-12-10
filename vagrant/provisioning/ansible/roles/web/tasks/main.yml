@@ -15,7 +15,7 @@
   when: nginx is succeeded
   template:
     src: index.html
-    dest: /var/www/index.html
+    dest: /var/www/html/index.html
   notify:
     - Reload Nginx
   become: yes
