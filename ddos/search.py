@@ -36,6 +36,7 @@ def get_ip_addresses():
                 ips.append(ip.ip)
                 networks.append("%s/%s" % (ip.ip, ip.network_prefix))
 
+    networks = ['192.168.10.1/24'] # TO TEST ONLY
     return networks, ips
 
 
