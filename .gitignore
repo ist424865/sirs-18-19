@@ -6,3 +6,4 @@ env/
 playbook.retry
 ddos.zip
 *.swp
+*.pages
