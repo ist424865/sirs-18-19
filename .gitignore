@@ -7,3 +7,4 @@ playbook.retry
 ddos.zip
 *.swp
 *.pages
+*.DS_Store
