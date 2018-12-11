@@ -21,3 +21,24 @@
 
   roles:
     - vulnerable
+
+- name: Configure and deploy the router
+  hosts: routers
+  remote_user: root
+
+  roles:
+    - router
+
+- name: Configure and deploy the firewall
+  hosts: firewall
+  remote_user: root
+
+  roles:
+    - firewall
+
+- name: Configure and deploy the intrusion prevention system
+  hosts: ips
+  remote_user: root
+
+  roles:
+    - ips
