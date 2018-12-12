@@ -1,1 +1,10 @@
 ---
+
+- name: Ensure a list of common packages is present
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - tcpdump
+  become: yes
