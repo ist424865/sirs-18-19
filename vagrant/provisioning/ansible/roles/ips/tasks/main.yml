@@ -68,25 +68,36 @@
   become: yes
   notify: Restart Snort
 
-- name: Ensuring directory exists (/usr/lib/snort_dynamicrules)
+- name: Ensuring directories exists
   file:
-    dest: /usr/lib/snort_dynamicrules
+    dest: "{{ item }}"
     state: directory
     owner: root
     group: root
     mode: 0755
     recurse: yes
   become: yes
+  with_items:
+    - "/usr/lib/snort_dynamicrules"
+    - "/usr/lib/snort_dynamicengine"
+    - "/usr/lib/snort_dynamicpreprocessor"
   when: >
     ansible_distribution_release == "precise" or
     ansible_distribution_release == "wheezy"
 
-# copy dynamics
-# copy rules to etc/snort/rules
+- name: Import Snort Rules
+  template:
+    src: "rules"
+    dest: "/etc/snort/rules"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
 
 - name: Validate Snort Configuration
   become: yes
-  command: "/usr/sbin/snort -T -i eth0 -c /etc/snort/snort.conf"
+  command: "/usr/sbin/snort -T -i eth1 -c /etc/snort/snort.conf"
   register: snort_validation
+  ignore_errors: yes
   notify:
     - Restart Snort
