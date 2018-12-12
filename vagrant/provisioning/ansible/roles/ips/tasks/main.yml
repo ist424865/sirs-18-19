@@ -9,9 +9,11 @@
 
 - name: Untar Snort
   become: yes
-  unarchive: src=/tmp/snort-{{snort_version}}.tar.gz
-             dest=/opt/snort-src
-             copy=no
+  unarchive: 
+    src: /tmp/snort-{{snort_version}}.tar.gz
+    dest: /opt/snort-src
+    copy: no
+    creates: yes
   when: download_snort.changed
   register: untar_snort
 

@@ -2,5 +2,5 @@
 # This playbook initializes snort
 
 - name: Start Snort
-      become: yes
-      service: name=snort state=started
+  become: yes
+  service: name=snort state=started

@@ -32,6 +32,7 @@
 - name: Configure and deploy the intrusion prevention system
   hosts: ips
   remote_user: root
-
+  vars:
+    snort_version: 2.9.12
   roles:
     - ips
