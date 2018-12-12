@@ -7,86 +7,118 @@
     dest: /tmp
   register: download_snort
 
+- name: Create Directory
+  become: yes
+  file:
+    path: /opt/snort-src
+    state: directory
+
 - name: Untar Snort
   become: yes
-  unarchive: 
+  unarchive:
     src: /tmp/snort-{{snort_version}}.tar.gz
     dest: /opt/snort-src
     copy: no
-    creates: yes
-  when: download_snort.changed
+  when: download_snort
   register: untar_snort
 
 - name: Install Snort
-  command: chdir=/opt/snort-src/snort-{{snort_version}} {{item}}
+  command:
+    chdir: /opt/snort-src/snort-{{snort_version}} {{item}}
   become: yes
   with_items:
-  - "./configure --enable-sourcefire"
-  - "/usr/bin/make"
-  - "/usr/bin/make install"
-  - "ldconfig"
-  when: untar_snort.changed
+    - "./configure --enable-sourcefire"
+    - "/usr/bin/make"
+    - "/usr/bin/make install"
+    - "ldconfig"
+  when: untar_snort
   register: install_snort
 
 - name: Create Snort symlink
   become: yes
-  file: src=/usr/local/bin/snort dest=/usr/sbin/snort state=link
+  file:
+    src: /usr/local/bin/snort
+    dest: /usr/sbin/snort
+    state: link
 
 - name: Create Snort group
   become: yes
-  group: name=snort state=present
+  group:
+    name: snort
+    state: present
 
 - name: Create Snort user
   become: yes
-  user: name=snort
-        group=snort
-        system=yes
-        shell=/sbin/nologin
-        comment=SNORT_IDS
+  user:
+    name: snort
+    group: snort
+    system: yes
+    shell: /sbin/nologin
+    comment: SNORT_IDS
 
 - name: Create Snort directories
   become: yes
-  file: path=/etc/{{item}} state=directory owner=snort group=snort mode=5775
+  file:
+    path: /etc/{{item}}
+    state: directory
+    owner: snort
+    group: snort
+    mode: 5775
   with_items:
-  - snort
-  - snort/rules
-  - snort/rules/iplists
-  - snort/preproc_rules
-  - snort/so_rules
+    - snort
+    - snort/rules
+    - snort/rules/iplists
+    - snort/preproc_rules
+    - snort/so_rules
   register: dir_created
 
 - name: Create Snort dynamic rules directory
   become: yes
-  file: path=/usr/local/lib/snort_dynamicrules state=directory owner=snort group=snort mode=5775
+  file:
+    path: /usr/local/lib/snort_dynamicrules
+    state: directory
+    owner: snort
+    group: snort
+    mode: 5775
 
 - name: Create Snort log directories
   become: yes
-  file: path=/var/log/{{item}} state=directory owner=snort group=snort mode=5775
+  file:
+    path: /var/log/{{item}}
+    state: directory
+    owner: snort
+    group: snort
+    mode: 5775
   with_items:
-  - snort
-  - snort/archived_logs
+    - snort
+    - snort/archived_logs
 
 - name: Create Files that stores Rules and IP lists
   become: yes
-  file: path=/etc/snort/{{item}} state=touch owner=snort group=snort mode=775
+  file:
+    path: /etc/snort/{{item}}
+    state: touch
+    owner: snort
+    group: snort
+    mode: 775
   with_items:
-  - rules/iplists/black_list.rules
-  - rules/iplists/white_list.rules
-  - rules/local.rules
-  - sid-msg.map
+    - rules/iplists/black_list.rules
+    - rules/iplists/white_list.rules
+    - rules/local.rules
+    - sid-msg.map
   when: dir_created.changed
 
 - name: Copy Config files and dynamic preprocessors
   become: yes
   command: cp /opt/snort-src/snort-{{snort_version}}/etc/{{item}} /etc/snort
   with_items:
-  - file_magic.conf
-  - reference.config
-  - threshold.conf
-  - classification.config
-  - unicode.map
-  - gen-msg.map
-  - attribute_table.dtd
+    - file_magic.conf
+    - reference.config
+    - threshold.conf
+    - classification.config
+    - unicode.map
+    - gen-msg.map
+    - attribute_table.dtd
   when: install_snort.changed
 
 - name: Copy dynamic preprocessors
