@@ -1,148 +1,92 @@
 ---
 # This playbook contains plays that will be run on the ips node.
 
-- name: Download Snort
-  get_url:
-    url: https://snort.org/downloads/snort/snort-{{snort_version}}.tar.gz
-    dest: /tmp
-  register: download_snort
-
-- name: Create Directory
+- name: Updating apt-cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 86400
   become: yes
-  file:
-    path: /opt/snort-src
-    state: directory
 
-- name: Untar Snort
+- name: Installing iproute
+  apt:
+    name: iproute
+    state: present
   become: yes
-  unarchive:
-    src: /tmp/snort-{{snort_version}}.tar.gz
-    dest: /opt/snort-src
-    copy: no
-  when: download_snort
-  register: untar_snort
+  when: >
+    ansible_distribution != "Ubuntu" or
+    (ansible_distribution == "Ubuntu" and
+    ansible_distribution_major_version < "18")
 
-- name: Install Snort
-  command:
-    chdir: /opt/snort-src/snort-{{snort_version}} {{item}}
+- name: Installing iproute2
+  apt:
+    name: iproute2
+    state: present
+  become: yes
+  when: >
+    ansible_distribution == "Ubuntu" and
+    ansible_distribution_major_version >= "18"
+
+- name: Installing pre-reqs
+  apt:
+    name: "{{ item }}"
+    state: present
   become: yes
   with_items:
-    - "./configure --enable-sourcefire"
-    - "/usr/bin/make"
-    - "/usr/bin/make install"
-    - "ldconfig"
-  when: untar_snort
-  register: install_snort
+    - build-essential
+    - ethtool
+    - flex
+    - libpcap-dev
+    - libpcre3-dev
+    - libdumbnet-dev
+    - zlib1g-dev
 
-- name: Create Snort symlink
-  become: yes
-  file:
-    src: /usr/local/bin/snort
-    dest: /usr/sbin/snort
-    state: link
-
-- name: Create Snort group
-  become: yes
-  group:
+- name: Download and Install Snort
+  apt:
     name: snort
     state: present
-
-- name: Create Snort user
+  register: download_snort
+  ignore_errors: yes
   become: yes
-  user:
-    name: snort
-    group: snort
-    system: yes
-    shell: /sbin/nologin
-    comment: SNORT_IDS
 
-- name: Create Snort directories
-  become: yes
-  file:
-    path: /etc/{{item}}
-    state: directory
-    owner: snort
-    group: snort
-    mode: 5775
-  with_items:
-    - snort
-    - snort/rules
-    - snort/rules/iplists
-    - snort/preproc_rules
-    - snort/so_rules
-  register: dir_created
-
-- name: Create Snort dynamic rules directory
-  become: yes
-  file:
-    path: /usr/local/lib/snort_dynamicrules
-    state: directory
-    owner: snort
-    group: snort
-    mode: 5775
-
-- name: Create Snort log directories
-  become: yes
-  file:
-    path: /var/log/{{item}}
-    state: directory
-    owner: snort
-    group: snort
-    mode: 5775
-  with_items:
-    - snort
-    - snort/archived_logs
-
-- name: Create Files that stores Rules and IP lists
-  become: yes
-  file:
-    path: /etc/snort/{{item}}
-    state: touch
-    owner: snort
-    group: snort
-    mode: 775
-  with_items:
-    - rules/iplists/black_list.rules
-    - rules/iplists/white_list.rules
-    - rules/local.rules
-    - sid-msg.map
-  when: dir_created.changed
-
-- name: Copy Config files and dynamic preprocessors
-  become: yes
-  command: cp /opt/snort-src/snort-{{snort_version}}/etc/{{item}} /etc/snort
-  with_items:
-    - file_magic.conf
-    - reference.config
-    - threshold.conf
-    - classification.config
-    - unicode.map
-    - gen-msg.map
-    - attribute_table.dtd
-  when: install_snort.changed
-
-- name: Copy dynamic preprocessors
-  become: yes
-  synchronize:
-     src: /opt/snort-src/snort-{{snort_version}}/src/dynamic-preprocessors/build/usr/local/lib/snort_dynamicpreprocessor/
-     dest: /usr/local/lib/snort_dynamicpreprocessor
-  delegate_to: "{{ inventory_hostname }}"
-  when: install_snort.changed
-
-- name: Snort Startup script
-  become: yes
+- name: Configure Snort
   template:
-    src: "../templates/etc/init/snort.conf.j2"
-    dest: "/etc/init/snort.conf"
-    owner: snort
-    group: snort
-    mode: 0755
-
-- name: Configuring Snort
+    src: "snort.conf.j2"
+    dest: /etc/snort/snort.conf
+    owner: root
+    group: root
+    mode: 0644
   become: yes
+  notify: Restart Snort
+
+- name: Configuring Snort Daemon
   template:
-    src: "../templates/snort.conf"
-    dest: "/etc/snort/snort.conf"
-    owner: snort
-    group: snort
+    src: "snort.debian.conf.j2"
+    dest: "/etc/snort/snort.debian.conf"
+    owner: root
+    group: root
+    mode: 0600
+  become: yes
+  notify: Restart Snort
+
+- name: Ensuring directory exists (/usr/lib/snort_dynamicrules)
+  file:
+    dest: /usr/lib/snort_dynamicrules
+    state: directory
+    owner: root
+    group: root
     mode: 0755
+    recurse: yes
+  become: yes
+  when: >
+    ansible_distribution_release == "precise" or
+    ansible_distribution_release == "wheezy"
+
+# copy dynamics
+# copy rules to etc/snort/rules
+
+- name: Validate Snort Configuration
+  become: yes
+  command: "/usr/sbin/snort -T -i eth0 -c /etc/snort/snort.conf"
+  register: snort_validation
+  notify:
+    - Restart Snort

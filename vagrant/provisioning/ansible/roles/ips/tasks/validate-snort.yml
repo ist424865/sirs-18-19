@@ -3,9 +3,7 @@
 
 - name: Validate Snort Configuration
   become: yes
-  command: "snort -T -i eth0 -c /etc/snort/snort.conf"
+  command: "/usr/sbin/snort -T -i eth0 -c /etc/snort/snort.conf"
   register: snort_validation
   notify:
-  - Start Snort
-
-- debug: var=snort_validation verbosity=2
+    - Restart Snort
