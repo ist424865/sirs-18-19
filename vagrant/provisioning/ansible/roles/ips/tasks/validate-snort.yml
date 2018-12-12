@@ -1,9 +1,0 @@
----
-# This playbook contains plays that will be check if snort's configuration is valid
-
-- name: Validate Snort Configuration
-  become: yes
-  command: "/usr/sbin/snort -T -i eth0 -c /etc/snort/snort.conf"
-  register: snort_validation
-  notify:
-    - Restart Snort

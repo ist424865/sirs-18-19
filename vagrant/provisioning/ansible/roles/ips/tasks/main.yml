@@ -87,17 +87,20 @@
 
 - name: Import Snort Rules
   template:
-    src: "rules"
+    src: "{{ item }}"
     dest: "/etc/snort/rules"
     owner: root
     group: root
     mode: 0644
+  with_items:
+    - "rules/white_list.rules"
+    - "rules/black_list.rules"
+    - "rules/local.rules"
   become: yes
 
 - name: Validate Snort Configuration
   become: yes
-  command: "/usr/sbin/snort -T -i eth1 -c /etc/snort/snort.conf"
+  command: "/usr/sbin/snort -T -i eth0:eth1 -c /etc/snort/snort.conf"
   register: snort_validation
-  ignore_errors: yes
   notify:
     - Restart Snort

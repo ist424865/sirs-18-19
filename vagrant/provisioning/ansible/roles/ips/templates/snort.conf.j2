@@ -270,9 +270,12 @@ preprocessor normalize_icmp6
 
 # Target-based IP defragmentation.  For more information, see README.frag3
 preprocessor frag3_global: max_frags 65536
-preprocessor frag3_engine: policy windows detect_anomalies overlap_limit 10 min_fragment_length 100 timeout 180
+preprocessor frag3_engine: detect_anomalies overlap_limit 10 min_fragment_length 100 timeout 180
 
 # Target-Based stateful inspection/stream reassembly.  For more information, see README.stream5
+preprocessor stream5_global:
+preprocessor stream5_tcp:
+preprocessor stream5_udp: timeout 180
 
 # performance statistics.  For more information, see the Snort Manual, Configuring Snort - Preprocessors - Performance Monitor
 # preprocessor perfmonitor: time 300 file /var/snort/snort.stats pktcnt 10000
