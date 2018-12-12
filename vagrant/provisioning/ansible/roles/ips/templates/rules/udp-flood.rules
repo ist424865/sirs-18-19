@@ -1,0 +1,5 @@
+#--------------
+#  SNORT RULES
+#--------------
+
+alert udp $EXTERNAL_NET any -> $HOME_NET $UDP_PORTS (msg:"Possible UDP DDoS"; flow: stateless; threshold: type both, track by_dst, count 100, seconds 5; sid:12345; rev:1;)

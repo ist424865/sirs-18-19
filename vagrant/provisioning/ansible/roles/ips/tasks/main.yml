@@ -107,7 +107,7 @@
 - name: Configuring Snort
   become: yes
   template:
-    src: "../templates/etc/snort.conf.j2"
+    src: "../templates/snort.conf"
     dest: "/etc/snort/snort.conf"
     owner: snort
     group: snort
